@@ -24,7 +24,58 @@ module.exports = function WaterooWcm(pluginConf, web, next) {
       asyncCallback();
     });
 
-  }], function() {
+  },
+
+    function(asyncCallback) {
+      if (!web.syspars) {
+        console.warn('wateroo cms needs oils-plugin-syspars plugin');
+        return;
+      }
+      web.syspars.get('WCM_RUN_ONCE', function(err, syspar) {
+        if (!syspar) {
+        //if (true) {
+
+          //make sure folders exists in dms
+           console.log('First time to run. Running WCM init data.');
+          var fs = require('fs')
+          async.series([
+
+             function(callback) {
+               fs.readFile(web.conf.baseDir + pluginConf.pluginPath + '/templates/index.html', 'utf8', function (err,data) {
+                  if (err) {
+                    return console.error(err);
+                  }
+                  
+                  dmsUtils.createFileIfNotExist('/web/views/index.html', data, callback);
+                });
+            },
+            
+            function(callback) {
+              //fs.readFile is relative to project folder
+               fs.readFile(web.conf.baseDir + pluginConf.pluginPath + '/templates/main.html', 'utf8', function (err,data) {
+                if (err) {
+                  return console.error(err);
+                }
+               
+                dmsUtils.createFileIfNotExist('/web/views/templates/main.html', data, callback);
+              });
+            },
+
+           
+
+            function(callback) {
+               dmsUtils.createFileIfNotExist('/web/public/css/main.css', "", callback);
+            }
+
+          ], function() {
+            asyncCallback();
+          });
+           
+          web.syspars.set('WCM_RUN_ONCE', 'Y')
+        }
+      });  
+    }
+  ], function() {
     dmsUtils.retrieveDoc(DEFAULT_SETTINGS_PATH, function(err, doc) {
       if (err) throw err;
       if (doc) {
@@ -39,51 +90,9 @@ module.exports = function WaterooWcm(pluginConf, web, next) {
     })
   })
 
-  web.on('initServer', function() {
 
-    if (!web.syspars) {
-      console.warn('wateroo cms needs oils-plugin-syspars plugin');
-      return;
-    }
-    web.syspars.get('WCM_RUN_ONCE', function(err, syspar) {
-      if (!syspar) {
-      //if (true) {
+    
 
-        //make sure folders exists in dms
-         console.log('First time to run. Running WCM init data.');
-        var fs = require('fs')
-        async.series([
-          function(callback) {
-            //fs.readFile is relative to project folder
-             fs.readFile(web.conf.baseDir + pluginConf.pluginPath + '/templates/main.html', 'utf8', function (err,data) {
-              if (err) {
-                return console.error(err);
-              }
-             
-              dmsUtils.createFileIfNotExist('/web/views/templates/main.html', data, callback);
-            });
-          },
-
-          function(callback) {
-             fs.readFile(web.conf.baseDir + pluginConf.pluginPath + '/templates/index.html', 'utf8', function (err,data) {
-                if (err) {
-                  return console.error(err);
-                }
-                
-                dmsUtils.createFileIfNotExist('/web/views/index.html', data, callback);
-              });
-          },
-
-          function(callback) {
-             dmsUtils.createFileIfNotExist('/web/public/css/main.css', "", callback);
-          }
-
-        ]);
-         
-        web.syspars.set('WCM_RUN_ONCE', 'Y')
-      }
-    });
-  });
 
   next();
   
