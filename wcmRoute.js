@@ -145,7 +145,7 @@ module.exports = function(pluginConf, web, wcmSettings) {
     renderMongoPath(path, req, res, next);
   })
 
-
+  
   if (homeView) {
     server.get('/', function(req, res, next) {
         renderMongoPath(homeView, req, res, next);

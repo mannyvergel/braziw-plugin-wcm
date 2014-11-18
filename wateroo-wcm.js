@@ -72,6 +72,8 @@ module.exports = function WaterooWcm(pluginConf, web, next) {
           });
            
           web.syspars.set('WCM_RUN_ONCE', 'Y')
+        } else {
+          asyncCallback()
         }
       });  
     }
