@@ -28,25 +28,25 @@ module.exports = function(pluginConf, web, wcmSettings) {
   var NunjucksMongoLoader = nunjucks.Loader.extend({
     async: true,
     init: function(basePath) {
-          this.pathsToNames = {};
-          this.basePath = basePath;
+        this.pathsToNames = {};
+        this.basePath = basePath;
 
-      },
-     
-      getSource: function(name, callback) {
+    },
+   
+    getSource: function(name, callback) {
 
-          var fullpath = path.join(this.basePath, name);
-         
-          this.pathsToNames[fullpath] = name;
+        var fullpath = path.join(this.basePath, name);
+       
+        this.pathsToNames[fullpath] = name;
 
-          dmsUtils.retrieveDoc(fullpath, function(err, doc) {
-            if (err) {throw err}
-            if (!doc) {
-              callback(new Error('Path not found '+ fullpath));
-            }
-             
+        dmsUtils.retrieveDoc(fullpath, function(err, doc) {
+          if (err) {throw err}
+          if (!doc) {
+            callback(new Error('Path not found '+ fullpath));
+          } else {
             callback(err, {src: doc.content.toString('utf-8'), path: fullpath});
-          })
+          }
+        })
       }
   });
 
@@ -111,7 +111,11 @@ module.exports = function(pluginConf, web, wcmSettings) {
   var renderMongoPath = function(path, req, res, next) {
     wcm.templateEngine.render(path, {}, function(err, res2) {
       if (err) {
-        res.status(500).send(err);
+        if (web.conf.isDebug) {
+          res.status(500).send(err.stack);
+        } else {
+          res.status(500).send('Internal server error');
+        }
         throw err;
       }
       res.send(res2);
