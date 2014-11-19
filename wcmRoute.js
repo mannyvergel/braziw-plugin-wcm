@@ -100,9 +100,13 @@ module.exports = function(pluginConf, web, wcmSettings) {
         if (err) throw err;
 
         if (doc) {
+          var getMimeType = require('simple-mime')('application/octect-stream');
+
+          var type = getMimeType(doc.name);
+          res.writeHead(200, {'Content-Type': type})
           res.end(doc.content);
         } else {
-          next();
+          res.status(404).send('File not found.');
         }
       })
     }

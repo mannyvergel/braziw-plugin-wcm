@@ -64,7 +64,14 @@ module.exports = function WaterooWcm(pluginConf, web, next) {
            
 
             function(callback) {
-               dmsUtils.createFileIfNotExist('/web/public/css/main.css', "", callback);
+              fs.readFile(web.conf.baseDir + pluginConf.pluginPath + '/templates/css/main.css', 'utf8', function (err,data) {
+                if (err) {
+                  return console.error(err);
+                }
+               
+                dmsUtils.createFileIfNotExist('/web/public/css/main.css', data, callback);
+              });
+
             }
 
           ], function() {

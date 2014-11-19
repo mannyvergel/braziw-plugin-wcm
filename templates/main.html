@@ -25,11 +25,28 @@
   {% endblock %}
 </head>
 <body>
-
+<header>
+  <div class="row">
+    <ul class="menu clearfix">
+      <li><a href="/">Home</a></li>
+    </ul>
+  </div>
+</header>
 
       {% block content %}{% endblock %}
 
-  
+
+<footer>
+   <div class="row">
+     <p>WCM Plugin is part of Wateroo CMS</p>
+   </div>
+</footer>
+
+<script src="/js/vendor/jquery.min.js"></script>
+<script src="/js/foundation.min.js"></script>
+<script>
+  $(document).foundation();
+</script>
 
 <script src="/js/vendor/jquery.min.js"></script>
 <script src="/js/foundation.min.js"></script>
