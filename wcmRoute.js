@@ -112,19 +112,27 @@ module.exports = function(pluginConf, web, wcmSettings) {
     }
   }
 
-  var renderMongoPath = function(path, req, res, next) {
-    wcm.templateEngine.render(path, {}, function(err, res2) {
-      if (err) {
-        if (web.conf.isDebug) {
-          res.status(500).send(err.stack);
-        } else {
-          res.status(500).send('Internal server error');
-        }
-        throw err;
+  var renderMongoPath = function(name, req, res, next) {
+    var fullpath = path.join(viewsDir, name);
+
+    dmsUtils.retrieveDoc(fullpath, function(err, doc) {
+      if (!doc) {
+        next();
+        return;
       }
-      res.send(res2);
+      wcm.templateEngine.render(name, {}, function(err, res2) {
+        if (err) {
+          if (web.conf.isDebug) {
+            res.status(500).send(err.stack);
+          } else {
+            res.status(500).send('Internal server error');
+          }
+          throw err;
+        }
+        res.send(res2);
+      });
     });
-    
+  
   }
 
   var viewsHandler = function() {
@@ -139,34 +147,37 @@ module.exports = function(pluginConf, web, wcmSettings) {
     }
   }
 
-  server.get(routePublic, publicHandler());
-  server.all(routeViews, viewsHandler());
-  server.all('/article/:YEAR/:SLUG', function(req, res, next) {
-    var path = '/article.html';
-    //console.log('!!!!' + path);
-    renderMongoPath(path, req, res, next);
-  })
+  //web.on('initServer', function() {
 
-  server.all('/article', function(req, res, next) {
-    var path = '/article.html';
-    //console.log('!!!!' + path);
-    renderMongoPath(path, req, res, next);
-  })
+    
+    if (homeView) {
+      server.get('/', function(req, res, next) {
+          renderMongoPath(homeView, req, res, next);
+        })
+      if (console.isDebug) {
 
-  
-  if (homeView) {
-    server.get('/', function(req, res, next) {
-        renderMongoPath(homeView, req, res, next);
-      })
-    if (console.isDebug) {
-
-      console.debug('Setting homeView to %s', homeView);
+        console.debug('Setting homeView to %s', homeView);
+      }
+    } else {
+      if (console.isDebug) {
+        console.debug('homeView not found. Skipping.');
+      }
     }
-  } else {
-    if (console.isDebug) {
-      console.debug('homeView not found. Skipping.');
-    }
-  }
+    server.get(routePublic, publicHandler());
+    server.all(routeViews, viewsHandler());
+    server.all('/article/:YEAR/:SLUG', function(req, res, next) {
+      var path = '/article.html';
+      //console.log('!!!!' + path);
+      renderMongoPath(path, req, res, next);
+    })
+
+    server.all('/article', function(req, res, next) {
+      var path = '/article.html';
+      //console.log('!!!!' + path);
+      renderMongoPath(path, req, res, next);
+    })
+
+  //})
 
 
 
