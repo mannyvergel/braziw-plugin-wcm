@@ -7,8 +7,8 @@ module.exports = function(pluginConf, web, wcmSettings) {
   if (console.isDebug) {
     console.debug('WCM Settings : ' + JSON.stringify(wcmSettings));
   }
-  var dmsUtils = web.dms.utils;
-  var wcmConstants = web.dms.wcm.constants;
+  var dmsUtils = web.cms.utils;
+  var wcmConstants = web.cms.wcm.constants;
   var baseRouteViews = wcmSettings.baseRouteViews;
   var baseRoutePublic = wcmSettings.baseRoutePublic;
 
@@ -23,7 +23,16 @@ module.exports = function(pluginConf, web, wcmSettings) {
 
   var server = web.app;
 
-  var wcm = web.dms.wcm;
+  var wcm = web.cms.wcm;
+
+
+
+  web.on('cms.beforeRenderList', function(options, req, res) {
+    var folderPath = options.folderPath;
+    if (folderPath.indexOf(viewsDir) == 0) {
+      options.defaultDocTypeForAddFile = 'HtmlView';
+    }
+  })  
 
   var NunjucksMongoLoader = nunjucks.Loader.extend({
     async: true,
@@ -44,7 +53,7 @@ module.exports = function(pluginConf, web, wcmSettings) {
           if (!doc) {
             callback(new Error('Path not found '+ fullpath));
           } else {
-            callback(err, {src: doc.content.toString('utf-8'), path: fullpath});
+            callback(err, {src: doc.content.toString('utf-8'), path: fullpath, noCache: web.conf.isDebug});
           }
         })
       }
@@ -69,9 +78,9 @@ module.exports = function(pluginConf, web, wcmSettings) {
   var routePublic = getRegexFromStr('/^' + baseRoutePublic + '(.*)/');
   var routeViews = getRegexFromStr('/^' + baseRouteViews + '(.*)/');
 
-  var dmsRoutes = web.dms.routes;
+  var dmsRoutes = web.cms.routes;
   
-  web.on('dms.afterDocumentUpdate', function(doc) {
+  web.on('cms.afterDocumentUpdate', function(doc) {
     var fullPath = doc.folderPath + doc.name;
     if (console.isDebug) {
       console.debug('Nunjucks cache invalidated: ' + fullPath);

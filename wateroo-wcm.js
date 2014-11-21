@@ -3,14 +3,15 @@ var async = require('async');
 module.exports = function WaterooWcm(pluginConf, web, next) {
   
   var self = this;
-  web.dms.wcm = self;
-  web.dms.wcm.constants = new Object();
+  web.cms.wcm = self;
+  web.cms.wcm.constants = new Object();
   
-  web.dms.wcm.constants.VIEWS_DIR = '/views';
-  web.dms.wcm.constants.PUBLIC_DIR = '/public';
+  web.cms.wcm.constants.VIEWS_DIR = '/views';
+  web.cms.wcm.constants.PUBLIC_DIR = '/public';
 
-  
-  var dmsUtils = web.dms.utils;
+  web.cms.registerCmsModel('HtmlView', (pluginConf.pluginPath + '/models/HtmlView.js'))
+    
+  var dmsUtils = web.cms.utils;
   var DEFAULT_SETTINGS_PATH = '/web/settings.json';
   async.series([function(asyncCallback) {
     var defaultSettings = {
@@ -46,7 +47,7 @@ module.exports = function WaterooWcm(pluginConf, web, next) {
                     return console.error(err);
                   }
                   
-                  dmsUtils.createFileIfNotExist('/web/views/index.html', data, callback);
+                  dmsUtils.createFileIfNotExist('/web/views/index.html', {docType:'HtmlView', content: data}, callback);
                 });
             },
             
@@ -57,7 +58,7 @@ module.exports = function WaterooWcm(pluginConf, web, next) {
                   return console.error(err);
                 }
                
-                dmsUtils.createFileIfNotExist('/web/views/templates/main.html', data, callback);
+                dmsUtils.createFileIfNotExist('/web/views/templates/main.html', {docType:'HtmlView', content: data}, callback);
               });
             },
 
@@ -98,9 +99,6 @@ module.exports = function WaterooWcm(pluginConf, web, next) {
       }
     })
   })
-
-
-    
 
 
   next();
