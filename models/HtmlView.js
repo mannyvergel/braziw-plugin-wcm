@@ -2,20 +2,16 @@ module.exports = {
   name: 'HtmlView',
   label: 'Html View',
   schema: {
-  	controller: String,
+    docType: {type: String, required:true, default: 'HtmlView'},
+  	controller: String
   },
 
   initSchema: function(schema) {
     schema.index({docType: 1, slug: 1, year: -1}, {unique: true});
 
-	schema.pre('save', function(next) {
-      if (this.docType == 'Article') {
-      	if (!this.name) {
-	      this.name = this.title;
-	    }
-      }
+	  schema.pre('save', function(next) {
       next();
-    })
+    });
   },
 
   parentModel: web.cms.conf.models.Document,
