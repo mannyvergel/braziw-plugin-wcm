@@ -26,7 +26,8 @@
   "dependencies": {
   	"async": "0.2.x",
     "nunjucks": "1.1.x",
-    "simple-mime": "0.1.x"
+    "simple-mime": "0.1.x",
+    "slash": "1.0.x"
   },
   "devDependencies": {},
   "bundleDependencies": [],
