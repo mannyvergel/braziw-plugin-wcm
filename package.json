@@ -1,12 +1,14 @@
 {
   "name": "wateroo-plugin-wcm",
   "version": "1.0.0",
-  "description": "Web Content Management for Wateroo CMS",
+  "description": "Web Content Management plugin for Wateroo CMS",
   "keywords": [
-  	"oils",
-    "passport",
-    "authentication",
-    "authorization"
+  	"wcm",
+    "cms",
+    "wateroo",
+    "oils",
+    "content management system",
+    "web content"
   ],
   "author": {
     "name": "Manny Vergel",
