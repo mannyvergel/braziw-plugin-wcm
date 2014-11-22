@@ -34,7 +34,7 @@
   "devDependencies": {},
   "bundleDependencies": [],
 
-  "private": true,
+  "private": false,
   "main": "wateroo-wcm.js"
   
 }
