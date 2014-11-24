@@ -2,13 +2,13 @@
 //var Promise = require('es6-promise').Promise;
 //var extras = require('swig-extras');
 var nunjucks = require('nunjucks');
-var path = require('path');
+
 module.exports = function(pluginConf, web, wcmSettings) {
   if (console.isDebug) {
     console.debug('WCM Settings : ' + JSON.stringify(wcmSettings));
   }
-  var dmsUtils = web.dms.utils;
-  var wcmConstants = web.dms.wcm.constants;
+  var dmsUtils = web.cms.utils;
+  var wcmConstants = web.cms.wcm.constants;
   var baseRouteViews = wcmSettings.baseRouteViews;
   var baseRoutePublic = wcmSettings.baseRoutePublic;
 
@@ -23,7 +23,16 @@ module.exports = function(pluginConf, web, wcmSettings) {
 
   var server = web.app;
 
-  var wcm = web.dms.wcm;
+  var wcm = web.cms.wcm;
+
+
+
+  web.on('cms.beforeRenderList', function(options, req, res) {
+    var folderPath = options.folderPath;
+    if (folderPath.indexOf(viewsDir) == 0) {
+      options.defaultDocTypeForAddFile = 'HtmlView';
+    }
+  })  
 
   var NunjucksMongoLoader = nunjucks.Loader.extend({
     async: true,
@@ -35,7 +44,7 @@ module.exports = function(pluginConf, web, wcmSettings) {
    
     getSource: function(name, callback) {
 
-        var fullpath = path.join(this.basePath, name);
+        var fullpath = web.fileUtils.joinPath(this.basePath, name);
        
         this.pathsToNames[fullpath] = name;
 
@@ -44,7 +53,7 @@ module.exports = function(pluginConf, web, wcmSettings) {
           if (!doc) {
             callback(new Error('Path not found '+ fullpath));
           } else {
-            callback(err, {src: doc.content.toString('utf-8'), path: fullpath});
+            callback(err, {src: doc.content.toString('utf-8'), path: fullpath, noCache: web.conf.isDebug});
           }
         })
       }
@@ -53,7 +62,7 @@ module.exports = function(pluginConf, web, wcmSettings) {
   var nunjucksLoader = new NunjucksMongoLoader(viewsDir);
 
   wcm.templateEngine = new nunjucks.Environment(nunjucksLoader, {autoescape: true});
-  
+  web.templateEngine.extendNunjucks(wcm.templateEngine);
 
   var getRegexFromStr = function(regexStr) {
     var flags = regexStr.replace(/.*\/([gimy]*)$/, '$1');
@@ -69,9 +78,9 @@ module.exports = function(pluginConf, web, wcmSettings) {
   var routePublic = getRegexFromStr('/^' + baseRoutePublic + '(.*)/');
   var routeViews = getRegexFromStr('/^' + baseRouteViews + '(.*)/');
 
-  var dmsRoutes = web.dms.routes;
+  var dmsRoutes = web.cms.routes;
   
-  web.on('dms.afterDocumentUpdate', function(doc) {
+  web.on('cms.afterDocumentUpdate', function(doc) {
     var fullPath = doc.folderPath + doc.name;
     if (console.isDebug) {
       console.debug('Nunjucks cache invalidated: ' + fullPath);
@@ -113,24 +122,44 @@ module.exports = function(pluginConf, web, wcmSettings) {
   }
 
   var renderMongoPath = function(name, req, res, next) {
-    var fullpath = path.join(viewsDir, name);
+    var fullpath = web.fileUtils.joinPath(viewsDir, name);
 
     dmsUtils.retrieveDoc(fullpath, function(err, doc) {
       if (!doc) {
         next();
         return;
       }
-      wcm.templateEngine.render(name, {}, function(err, res2) {
+
+      var controller;
+
+      if (doc.get('controller')) {
+        //you have to use .get() for non defined models, need to fix this issue
+        controller = web.include(doc.get('controller'));
+      } else {
+        controller = function(callback) {
+          callback(null, {});
+        }
+      }
+
+      controller(function(err, options) {
         if (err) {
-          if (web.conf.isDebug) {
-            res.status(500).send(err.stack);
-          } else {
-            res.status(500).send('Internal server error');
-          }
           throw err;
         }
-        res.send(res2);
-      });
+        web.callEvent('beforeRender', [name, options, null, req, res])
+
+         wcm.templateEngine.render(name, options, function(err, res2) {
+          if (err) {
+            if (web.conf.isDebug) {
+              res.status(500).send(err.stack);
+            } else {
+              res.status(500).send('Internal server error');
+            }
+            throw err;
+          }
+          res.send(res2);
+        });
+      }, req, res, next);
+     
     });
   
   }
