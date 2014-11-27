@@ -6,14 +6,6 @@ module.exports = {
   	controller: String
   },
 
-  initSchema: function(schema) {
-    schema.index({docType: 1, slug: 1, year: -1}, {unique: true});
-
-	  schema.pre('save', function(next) {
-      next();
-    });
-  },
-
   parentModel: web.cms.conf.models.Document,
 
   editables: [{"name": "name", "type": "text", "label": "Name", "required": true},
