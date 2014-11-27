@@ -1,10 +1,11 @@
 {
   "name": "wateroo-plugin-wcm",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Web Content Management plugin for Wateroo CMS",
   "keywords": [
   	"wcm",
     "cms",
+    "plugin",
     "wateroo",
     "oils",
     "content management system",
