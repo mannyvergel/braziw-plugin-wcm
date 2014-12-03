@@ -81,7 +81,7 @@ module.exports = function(pluginConf, web, wcmSettings) {
   var dmsRoutes = web.cms.routes;
   
   web.on('cms.afterDocumentUpdate', function(doc) {
-    var fullPath = doc.folderPath + doc.name;
+    var fullPath = web.fileUtils.joinPath(nunjucksLoader.basePath, doc.folderPath, doc.name);
     if (console.isDebug) {
       console.debug('Nunjucks cache invalidated: ' + fullPath);
     }

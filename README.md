@@ -1,6 +1,6 @@
-wateroo-plugin-wcm
+braziw-plugin-wcm
 ==================
 
-Web Content Management (WCM) for Wateroo CMS
+Web Content Management (WCM) for Braziw CMS
 
 Uses nunjucks templating + optional support for markdown syntax.
