@@ -1,11 +1,11 @@
 {
-  "name": "wateroo-plugin-wcm",
+  "name": "braziw-plugin-wcm",
   "version": "1.0.1",
   "description": "Web Content Management plugin for Wateroo CMS",
   "keywords": [
     "wcm",
     "cms",
-    "wateroo",
+    "braziw",
     "oils",
     "content management system",
     "web content"
@@ -15,10 +15,10 @@
     "email": "manny@mvergel.com",
     "url": "http://www.mvergel.com/"
   },
-  "homepage": "http://www.github.com/mannyvergel/wateroo-plugin-wcm",
+  "homepage": "http://www.github.com/mannyvergel/braziw-plugin-wcm",
   "repository": {
     "type": "git",
-    "url": "https://www.github.com/mannyvergel/wateroo-plugin-wcm.git"
+    "url": "https://www.github.com/mannyvergel/braziw-plugin-wcm.git"
   },
   "engines": {
     "node": ">= 0.10.0"
@@ -32,12 +32,5 @@
   "devDependencies": {},
   "bundleDependencies": [],
   "private": false,
-  "main": "wcm.js",
-  "readme": "wateroo-plugin-wcm\n==================\n\nWeb Content Management (WCM) for Wateroo CMS\n\nUses nunjucks templating + optional support for markdown syntax.",
-  "readmeFilename": "README.md",
-  "gitHead": "ec8edc71266a8a7e55203f630ddec57913a520f5",
-  "_id": "wateroo-plugin-wcm@1.0.0",
-  "scripts": {},
-  "_shasum": "09b0ec8925ee0b26bbe02c4dad87018211e8fb56",
-  "_from": "wateroo-plugin-wcm@"
+  "main": "wcm.js"
 }
