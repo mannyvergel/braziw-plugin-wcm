@@ -6,6 +6,9 @@ module.exports = {
   	controller: String
   },
 
+  initSchema: function(schema) {
+  },
+
   parentModel: web.cms.conf.models.Document,
 
   editables: [{"name": "name", "type": "text", "label": "Name", "required": true},

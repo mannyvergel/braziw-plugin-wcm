@@ -81,7 +81,7 @@ module.exports = function(pluginConf, web, wcmSettings) {
   var dmsRoutes = web.cms.routes;
   
   web.on('cms.afterDocumentUpdate', function(doc) {
-    var fullPath = web.fileUtils.joinPath(nunjucksLoader.basePath, doc.folderPath, doc.name);
+    var fullPath = doc.folderPath + doc.name;
     if (console.isDebug) {
       console.debug('Nunjucks cache invalidated: ' + fullPath);
     }
@@ -92,9 +92,9 @@ module.exports = function(pluginConf, web, wcmSettings) {
 
   var publicHandler = function() {
     return function(req, res, next) {
-      if (console.isDebug) {
-        console.debug('PASSING WCM PUBLIC LOADER');
-      }
+      // if (console.isDebug) {
+      //   console.debug('PASSING WCM PUBLIC LOADER');
+      // }
       var path = req.params[0];
       if (!path) {
         path = '/index.html';
@@ -121,9 +121,11 @@ module.exports = function(pluginConf, web, wcmSettings) {
     }
   }
 
-  var renderMongoPath = function(name, req, res, next) {
+  var renderMongoPath = function(name, req, res, next, options) {
     var fullpath = web.fileUtils.joinPath(viewsDir, name);
-
+    if (console.isDebug) {
+      console.debug('Render mongo path: ' + fullpath);
+    }
     dmsUtils.retrieveDoc(fullpath, function(err, doc) {
       if (!doc) {
         next();
@@ -137,7 +139,7 @@ module.exports = function(pluginConf, web, wcmSettings) {
         controller = web.include(doc.get('controller'));
       } else {
         controller = function(callback) {
-          callback(null, {});
+          callback(null, options);
         }
       }
 
@@ -145,8 +147,9 @@ module.exports = function(pluginConf, web, wcmSettings) {
         if (err) {
           throw err;
         }
+        options = options || {};
         web.callEvent('beforeRender', [name, options, null, req, res])
-
+        web.callEvent('wcm.beforeRender', [name, options, null, req, res])
          wcm.templateEngine.render(name, options, function(err, res2) {
           if (err) {
             if (web.conf.isDebug) {
@@ -163,6 +166,8 @@ module.exports = function(pluginConf, web, wcmSettings) {
     });
   
   }
+
+  web.cms.wcm.renderPath = renderMongoPath;
 
   var viewsHandler = function() {
     return function(req, res, next) {

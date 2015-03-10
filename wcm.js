@@ -14,9 +14,9 @@ module.exports = function WaterooWcm(pluginConf, web, next) {
   var dmsUtils = web.cms.utils;
   var DEFAULT_SETTINGS_PATH = '/web/settings.json';
   async.series([function(asyncCallback) {
-    var defaultSettings = pluginConf.defaultWcmSettings || {
+    var defaultSettings = {
       baseDir: '/web',
-      baseRouteViews: '/p',
+      baseRouteViews: '', //can be /p for /p/about
       baseRoutePublic: '/pub',
       homeView: '/index.html'
     }
@@ -77,7 +77,7 @@ module.exports = function WaterooWcm(pluginConf, web, next) {
 
           ], function() {
             asyncCallback();
-            web.callEvent('cms.initWcm'); 
+            web.callEvent('cms.initWcm');
           });
            
           web.syspars.set('WCM_RUN_ONCE', 'Y')
