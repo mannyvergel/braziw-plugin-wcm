@@ -32,7 +32,7 @@
   "devDependencies": {},
   "bundleDependencies": [],
   "private": false,
-  "main": "wateroo-wcm.js",
+  "main": "wcm.js",
   "readme": "wateroo-plugin-wcm\n==================\n\nWeb Content Management (WCM) for Wateroo CMS\n\nUses nunjucks templating + optional support for markdown syntax.",
   "readmeFilename": "README.md",
   "gitHead": "ec8edc71266a8a7e55203f630ddec57913a520f5",
