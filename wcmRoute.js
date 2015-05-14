@@ -1,6 +1,3 @@
-//var markedSwig = require('swig-marked');
-//var Promise = require('es6-promise').Promise;
-//var extras = require('swig-extras');
 var nunjucks = require('nunjucks');
 
 module.exports = function(pluginConf, web, wcmSettings) {
@@ -51,7 +48,7 @@ module.exports = function(pluginConf, web, wcmSettings) {
         dmsUtils.retrieveDoc(fullpath, function(err, doc) {
           if (err) {throw err}
           if (!doc) {
-            callback(new Error('Path not found '+ fullpath));
+            callback(null);
           } else {
             callback(err, {src: doc.content.toString('utf-8'), path: fullpath, noCache: web.conf.isDebug});
           }
@@ -60,7 +57,7 @@ module.exports = function(pluginConf, web, wcmSettings) {
   });
 
   var nunjucksLoader = new NunjucksMongoLoader(viewsDir);
-
+  wcm.settings = wcmSettings;
   wcm.templateEngine = new nunjucks.Environment(nunjucksLoader, {autoescape: true});
   web.templateEngine.extendNunjucks(wcm.templateEngine);
 
