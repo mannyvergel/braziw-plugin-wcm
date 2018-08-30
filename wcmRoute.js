@@ -1,6 +1,8 @@
-var nunjucks = require('nunjucks');
+
 
 module.exports = function(pluginConf, web, wcmSettings) {
+  var nunjucks = web.require('nunjucks');
+
   if (console.isDebug) {
     console.debug('WCM Settings : ' + JSON.stringify(wcmSettings));
   }
