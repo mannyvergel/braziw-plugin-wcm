@@ -1,6 +1,8 @@
-
+const request = require('request');
+const url = require('url');
 
 module.exports = function(pluginConf, web, wcmSettings) {
+
   var nunjucks = web.require('nunjucks');
 
   if (console.isDebug) {
@@ -61,6 +63,10 @@ module.exports = function(pluginConf, web, wcmSettings) {
   var nunjucksLoader = new NunjucksMongoLoader(viewsDir);
   wcm.settings = wcmSettings;
   wcm.templateEngine = new nunjucks.Environment(nunjucksLoader, {autoescape: true});
+  wcm.invalidateCache = function(mongoLoaderCachePath) {
+    nunjucksLoader.emit('update', mongoLoaderCachePath);
+  }
+
   web.templateEngine.extendNunjucks(wcm.templateEngine);
 
   var getRegexFromStr = function(regexStr) {
@@ -77,15 +83,28 @@ module.exports = function(pluginConf, web, wcmSettings) {
   var routePublic = getRegexFromStr('/^' + baseRoutePublic + '(.*)/');
   var routeViews = getRegexFromStr('/^' + baseRouteViews + '(.*)/');
 
-  var dmsRoutes = web.cms.routes;
   
   web.on('cms.afterDocumentUpdate', function(doc) {
     var fullPath = doc.folderPath + doc.name;
-    if (console.isDebug) {
-      console.debug('Nunjucks cache invalidated: ' + fullPath);
-    }
 
-    nunjucksLoader.emit('update', fullPath);
+    if (fullPath.indexOf(viewsDir) == 0) {
+      let pathMinusViewsDir = fullPath.substr(viewsDir.length);
+      if (console.isDebug) {
+        console.debug('Nunjucks cache invalidated: ' + pathMinusViewsDir);
+      }
+      wcm.invalidateCache(pathMinusViewsDir);
+
+      if (web.conf.webServers) {
+        for (let webServer of web.conf.webServers) {
+          let serverFullPath = url.resolve(webServer, web.cms.wcm.constants.INVALIDATE_CACHE_URL);
+          
+          request({url: serverFullPath, method: 'GET', qs: {p: pathMinusViewsDir}})
+          .on('response', function(response) {
+            console.log("Invalidate call", serverFullPath, pathMinusViewsDir, "status code", response.statusCode);
+          });
+        }
+      }
+    }
     //wcm.swigMongo.invalidateCache();
   })
 

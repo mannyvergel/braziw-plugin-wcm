@@ -8,8 +8,26 @@ module.exports = function WaterooWcm(pluginConf, web, next) {
   
   web.cms.wcm.constants.VIEWS_DIR = '/views';
   web.cms.wcm.constants.PUBLIC_DIR = '/public';
+  web.cms.wcm.constants.INVALIDATE_CACHE_URL = '/wcm/invalidateCache';
 
-  web.cms.registerCmsModel('HtmlView', (pluginConf.pluginPath + '/models/HtmlView.js'))
+  web.cms.registerCmsModel('HtmlView', (pluginConf.pluginPath + '/models/HtmlView.js'));
+
+  web.addRoutes({
+    [web.cms.wcm.constants.INVALIDATE_CACHE_URL]: {
+      get: function(req, res) {
+
+        let path = req.query.p;
+
+        if (!path) {
+          res.status(400).send("NOT OK");
+          return;
+        }
+
+        web.cms.wcm.invalidateCache(path);
+        res.status(200).send("OK");
+      }
+    }
+  });
     
   var dmsUtils = web.cms.utils;
   var DEFAULT_SETTINGS_PATH = '/web/settings.json';
