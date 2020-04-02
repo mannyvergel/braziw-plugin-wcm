@@ -1,5 +1,6 @@
-const request = require('request');
+
 const url = require('url');
+const joinPath = require('path.join');
 
 module.exports = function(pluginConf, web, wcmSettings) {
 
@@ -45,7 +46,7 @@ module.exports = function(pluginConf, web, wcmSettings) {
    
     getSource: function(name, callback) {
 
-        var fullpath = web.fileUtils.joinPath(this.basePath, name);
+        var fullpath = joinPath(this.basePath, name);
        
         this.pathsToNames[fullpath] = name;
 
@@ -80,12 +81,12 @@ module.exports = function(pluginConf, web, wcmSettings) {
 
   baseRouteViews = baseRouteViews || '';
 
-  var routePublic = getRegexFromStr('/^' + baseRoutePublic + '(.*)/');
-  var routeViews = getRegexFromStr('/^' + baseRouteViews + '(.*)/');
+  var routePublic = getRegexFromStr('/^' + (baseRoutePublic) + '(.*)/');
+  var routeViews = getRegexFromStr('/^' + (baseRouteViews) + '(.*)/');
 
   
   web.on('cms.afterDocumentUpdate', function(doc) {
-    var fullPath = doc.folderPath + doc.name;
+    var fullPath = joinPath(doc.folderPath, doc.name);
 
     if (fullPath.indexOf(viewsDir) == 0) {
       let pathMinusViewsDir = fullPath.substr(viewsDir.length);
@@ -97,7 +98,7 @@ module.exports = function(pluginConf, web, wcmSettings) {
       if (web.conf.webServers) {
         for (let webServer of web.conf.webServers) {
           let serverFullPath = url.resolve(webServer, web.cms.wcm.constants.INVALIDATE_CACHE_URL);
-          
+          const request = require('request');
           request({url: serverFullPath, method: 'GET', qs: {p: pathMinusViewsDir}})
           .on('response', function(response) {
             console.log("Invalidate call", serverFullPath, pathMinusViewsDir, "status code", response.statusCode);
@@ -105,21 +106,19 @@ module.exports = function(pluginConf, web, wcmSettings) {
         }
       }
     }
-    //wcm.swigMongo.invalidateCache();
+
   })
 
   var publicHandler = function() {
     return function(req, res, next) {
-      // if (console.isDebug) {
-      //   console.debug('PASSING WCM PUBLIC LOADER');
-      // }
+
       var path = req.params[0];
       if (!path) {
         path = '/index.html';
       } else {
         path = path;
       }
-      var dmsPath = publicDir + path;
+      var dmsPath = joinPath(publicDir, path);
       if (console.isDebug) {
         console.debug('Routing dms path %s', dmsPath);
       }
@@ -127,7 +126,7 @@ module.exports = function(pluginConf, web, wcmSettings) {
         if (err) throw err;
 
         if (doc) {
-          var getMimeType = require('simple-mime')('application/octect-stream');
+          var getMimeType = require('simple-mime')('application/octet-stream');
 
           var type = getMimeType(doc.name);
           res.writeHead(200, {'Content-Type': type})
@@ -140,7 +139,7 @@ module.exports = function(pluginConf, web, wcmSettings) {
   }
 
   var renderMongoPath = function(name, req, res, next, options) {
-    var fullpath = web.fileUtils.joinPath(viewsDir, name);
+    var fullpath = joinPath(viewsDir, name);
     if (console.isDebug) {
       console.debug('Render mongo path: ' + fullpath);
     }
@@ -199,38 +198,27 @@ module.exports = function(pluginConf, web, wcmSettings) {
     }
   }
 
-  //web.on('initServer', function() {
-
     
-    if (homeView) {
-      server.get('/', function(req, res, next) {
-          renderMongoPath(homeView, req, res, next);
-        })
-      if (console.isDebug) {
+  if (homeView) {
+    server.get('/', function(req, res, next) {
+        renderMongoPath(homeView, req, res, next);
+      })
+    if (console.isDebug) {
 
-        console.debug('Setting homeView to %s', homeView);
-      }
-    } else {
-      if (console.isDebug) {
-        console.debug('homeView not found. Skipping.');
-      }
+      console.debug('Setting homeView to %s', homeView);
     }
+  } else {
+    if (console.isDebug) {
+      console.debug('homeView not found. Skipping.');
+    }
+  }
+  
+
+  web.on('initServer', function() {
     server.get(routePublic, publicHandler());
     server.all(routeViews, viewsHandler());
-    server.all('/article/:YEAR/:SLUG', function(req, res, next) {
-      var path = '/article.html';
-      //console.log('!!!!' + path);
-      renderMongoPath(path, req, res, next);
-    })
-
-    server.all('/article', function(req, res, next) {
-      var path = '/article.html';
-      //console.log('!!!!' + path);
-      renderMongoPath(path, req, res, next);
-    })
-
-  //})
-
+  })
+  
 
 
 }
