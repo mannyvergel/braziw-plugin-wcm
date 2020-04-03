@@ -197,24 +197,22 @@ module.exports = function(pluginConf, web, wcmSettings) {
       
     }
   }
-
-    
-  if (homeView) {
-    server.get('/', function(req, res, next) {
-        renderMongoPath(homeView, req, res, next);
-      })
-    if (console.isDebug) {
-
-      console.debug('Setting homeView to %s', homeView);
-    }
-  } else {
-    if (console.isDebug) {
-      console.debug('homeView not found. Skipping.');
-    }
-  }
   
 
   web.on('initServer', function() {
+    if (homeView) {
+      server.get('/', function(req, res, next) {
+          renderMongoPath(homeView, req, res, next);
+        })
+      if (console.isDebug) {
+
+        console.debug('Setting homeView to %s', homeView);
+      }
+    } else {
+      if (console.isDebug) {
+        console.debug('homeView not found. Skipping.');
+      }
+    }
     server.get(routePublic, publicHandler());
     server.all(routeViews, viewsHandler());
   })
