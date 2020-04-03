@@ -4,9 +4,19 @@ module.exports = async function(pluginConf, web) {
   var self = this;
   web.cms.wcm = self;
   web.cms.wcm.constants = new Object();
+
+  Object.assign(pluginConf, Object.assign(require('./conf/conf.js'), pluginConf));
   
-  web.cms.wcm.constants.VIEWS_DIR = '/views';
-  web.cms.wcm.constants.PUBLIC_DIR = '/public';
+  Object.defineProperty(web.cms.wcm.constants, 'VIEWS_DIR', {configurable: true, get: function() {
+    console.warn("web.cms.wcm.constants.VIEWS_DIR is obsolete, please use conf", new Error("Trace"));
+    return '/views';
+  }})
+
+  Object.defineProperty(web.cms.wcm.constants, 'PUBLIC_DIR', {configurable: true, get: function() {
+    console.warn("web.cms.wcm.constants.PUBLIC_DIR is obsolete, please use conf", new Error("Trace"));
+    return '/public';
+  }})
+
   web.cms.wcm.constants.INVALIDATE_CACHE_URL = '/admin/wcm/invalidateCache';
 
   web.cms.registerCmsModel('HtmlView', (pluginConf.pluginPath + '/models/HtmlView.js'));

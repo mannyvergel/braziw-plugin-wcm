@@ -17,9 +17,9 @@ module.exports = function(pluginConf, web, wcmSettings) {
   var homeView = wcmSettings.homeView;
 
   var baseDir = wcmSettings.baseDir;
-  var viewsDir = baseDir + wcmConstants.VIEWS_DIR;
+  var viewsDir = baseDir + pluginConf.viewsDir;
 
-  var publicDir = baseDir + wcmConstants.PUBLIC_DIR;
+  var publicDir = baseDir + pluginConf.publicDir;
 
   var regex = new RegExp();
 
