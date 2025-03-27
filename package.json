@@ -1,6 +1,6 @@
 {
   "name": "braziw-plugin-wcm",
-  "version": "7.0.2",
+  "version": "10.0.0",
   "description": "Web Content Management plugin for Wateroo CMS",
   "keywords": [
     "wcm",
@@ -21,14 +21,14 @@
     "url": "https://www.github.com/mannyvergel/braziw-plugin-wcm.git"
   },
   "engines": {
-    "node": ">= 10.0.0"
+    "node": ">= 19.0.0"
   },
   "dependencies": {
     "simple-mime": "0.1.x",
     "path.join": "~1.0.0"
   },
   "peerDependencies": {
-    "request": "*"
+    
   },
   "devDependencies": {},
   "bundleDependencies": [],

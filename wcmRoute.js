@@ -85,7 +85,7 @@ module.exports = function(pluginConf, web, wcmSettings) {
   var routeViews = getRegexFromStr('/^' + (baseRouteViews) + '(.*)/');
 
   
-  web.on('cms.afterDocumentUpdate', function(doc) {
+  web.on('cms.afterDocumentUpdate', async function(doc) {
     var fullPath = joinPath(doc.folderPath, doc.name);
 
     if (fullPath.indexOf(viewsDir) == 0) {
@@ -98,11 +98,22 @@ module.exports = function(pluginConf, web, wcmSettings) {
       if (web.conf.webServers) {
         for (let webServer of web.conf.webServers) {
           let serverFullPath = url.resolve(webServer, web.cms.wcm.constants.INVALIDATE_CACHE_URL);
-          const request = require('request');
-          request({url: serverFullPath, method: 'GET', qs: {p: pathMinusViewsDir}})
-          .on('response', function(response) {
-            console.log("Invalidate call", serverFullPath, pathMinusViewsDir, "status code", response.statusCode);
+          let fullUrl = `${serverFullPath}?p=${encodeURIComponent(pathMinusViewsDir)}`;
+
+          let resp = await fetch(fullUrl, {
+            method: 'get',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
           });
+
+          if (resp.status == 200) {
+            console.log("Successful Invalidate call:", fullUrl, pathMinusViewsDir, "status code:", resp.status);
+          } else {
+            console.warn(`Invalidate call failed: ${fullUrl}, resp:`, await resp.text());
+          }
+
         }
       }
     }

@@ -17,7 +17,7 @@ module.exports = async function(pluginConf, web) {
     return '/public';
   }})
 
-  web.cms.wcm.constants.INVALIDATE_CACHE_URL = '/admin/wcm/invalidateCache';
+  web.cms.wcm.constants.INVALIDATE_CACHE_URL = '/wcm/invalidateCache';
 
   web.cms.registerCmsModel('HtmlView', (pluginConf.pluginPath + '/models/HtmlView.js'));
 
@@ -28,12 +28,12 @@ module.exports = async function(pluginConf, web) {
         let path = req.query.p;
 
         if (!path) {
-          res.status(400).send("NOT OK");
+          res.status(400).json({msg:"NOT OK"});
           return;
         }
 
         web.cms.wcm.invalidateCache(path);
-        res.status(200).send("OK");
+        res.status(200).json({msg:"OK", path: path});
       }
     }
   });
